@@ -13,3 +13,4 @@
 #
 
 from . import thirdparty
+from . import product

@@ -15,21 +15,20 @@ import logging
 from .model import OdooObject
 
 
-class ThirdParty(OdooObject):
+class Product(OdooObject):
     # ====================================================================#
     # Splash Object Definition
-    name = "ThirdParty"
-    desc = "Odoo Partner"
-    icon = "fa fa-user"
+    name = 'Product'
+    desc = 'Odoo Partner Product'
+    icon = 'fa fa-industry'
 
     @staticmethod
     def getDomain():
-        return 'res.partner'
-
+        return 'product.product'
 
     def get_listed_fields(self):
         """Get List of Object Fields to Include in Lists"""
-        return ['ref', 'name', 'email']
+        return ['name', 'lst_price', 'code']
 
     # ====================================================================#
     # Object CRUD

@@ -15,8 +15,8 @@
 from odoo import http
 from splashpy.server import SplashServer
 from odoo.addons.splashsync.objects.thirdparty import ThirdParty
+from odoo.addons.splashsync.objects.product import Product
 from odoo.addons.splashsync.client import OdooClient
-
 
 class Webservice(http.Controller):
 
@@ -26,7 +26,7 @@ class Webservice(http.Controller):
         return SplashServer(
             http.request.env['ir.config_parameter'].sudo().get_param('splash_ws_id'),
             http.request.env['ir.config_parameter'].sudo().get_param('splash_ws_key'),
-            [ThirdParty()],
+            [ThirdParty(), Product()],
             [],
             OdooClient()
 
