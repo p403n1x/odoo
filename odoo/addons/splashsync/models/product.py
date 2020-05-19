@@ -12,4 +12,17 @@
 #  file that was distributed with this source code.
 #
 
-from . import objects
+
+from odoo import api, models, fields
+import logging
+
+
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
+
+    features_value_ids = fields.Many2many(
+        'product.attribute.value',
+        string="Features Values",
+        relation='product_variant_features',
+        help="Product Variants Features Only Values"
+    )

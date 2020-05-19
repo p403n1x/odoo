@@ -31,7 +31,7 @@ class ListsHelper:
     # ====================================================================#
 
     @abstractmethod
-    def objectsList( self, filter, params ):
+    def objectsList(self, filter, params):
         """
         Get Objects List
 
@@ -59,7 +59,7 @@ class ListsHelper:
             for result in results.read(self.get_listed_fields()):
                 objects["object-" + str(result['id'])] = result
         except Exception as exception:
-            Framework.log().error(exception.message)
+            Framework.log().fromException(exception)
         # ====================================================================#
         # Add Metadata
         objects['meta'] = {
