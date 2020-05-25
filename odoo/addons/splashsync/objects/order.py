@@ -16,21 +16,21 @@ from .model import OdooObject
 from splashpy import const
 
 
-class Invoice(OdooObject):
+class Order(OdooObject):
     # ====================================================================#
     # Splash Object Definition
-    name = "Invoice"
-    desc = "Odoo Invoice"
-    icon = "fa fa-usd"
+    name = "Order"
+    desc = "Odoo Order"
+    icon = "fa fa-shopping-cart"
 
     @staticmethod
     def getDomain():
-        return 'account.invoice'
+            return 'sale.order'
 
     @staticmethod
     def get_listed_fields():
         """Get List of Object Fields to Include in Lists"""
-        return ['display_name', 'vendor_display_name', 'date_invoice', 'number']
+        return ['name', 'display_name', 'client_order_ref', 'id']
 
     @staticmethod
     def get_required_fields():
