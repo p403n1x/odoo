@@ -67,7 +67,7 @@ class Webservice(http.Controller):
         # ====================================================================#
         # Build Splash Server with Common Options
         splash_objects = [
-            # ThirdParty(),
+            ThirdParty(),
             Product(),
             Invoice(),
             Order()
