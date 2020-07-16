@@ -48,7 +48,7 @@ class ProductImagesHelper:
             if value_id == "cover":
                 values += [True]
             elif value_id == "visible":
-                values += [not bool(isinstance(product.image_variant, bytes))]
+                values += [True]
             elif value_id == "position":
                 values += [position]
                 position += 1
@@ -142,18 +142,18 @@ class ProductImagesHelper:
         # ====================================================================#
         # Identify Cover & First Visible
         cover_index, cover_image = ProductImagesHelper.find_cover(images_list)
-        visible_index, visible_image = ProductImagesHelper.__find_first(images_list, None, True)
+        visible_index, visible_image = ProductImagesHelper.__find_first(images_list, False, True)
         # ====================================================================#
         # One of Them NOT found
         if cover_index is None or visible_index is None:
             return None, None
-        # First Visible is Cover
-        if cover_index == visible_index:
-            return None, None
-        # First Cover is Visible
-        if ProductImagesHelper.is_visible(images_list[cover_index]):
-            Framework.log().warn("Cover is Not First Image")
-            return None, None
+        # # First Visible is Cover
+        # if cover_index == visible_index:
+        #     return None, None
+        # # First Cover is Visible
+        # if ProductImagesHelper.is_visible(images_list[cover_index]):
+        #     Framework.log().warn("Cover is Not First Image")
+        #     return None, None
 
         return visible_index, visible_image
 
@@ -181,6 +181,7 @@ class ProductImagesHelper:
                     continue
             if is_visible is not None:
                 if ProductImagesHelper.is_visible(spl_image) != is_visible:
+
                     continue
             return index, spl_image["image"]
 

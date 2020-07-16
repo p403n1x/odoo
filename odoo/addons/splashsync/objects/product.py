@@ -51,11 +51,11 @@ class Product(
     def get_composite_fields():
         """Get List of Fields NOT To Parse Automaticaly """
         return [
-            "id", "valuation", "cost_method",
+            "id", "valuation", "cost_method", "tracking",
             "image", "image_small", "image_medium", "image_variant",
-            "rating_last_image", "rating_last_feedback",
-            "message_unread_counter",
-            "price", "lst_price", "list_price", "standard_price",
+            "rating_last_image", "rating_last_feedback", "sale_line_warn",
+            "message_unread_counter", "purchase_line_warn",
+            "price", "lst_price", "list_price", "price_extra", "variant_price_extra", "standard_price",
         ]
 
     @staticmethod
@@ -76,9 +76,11 @@ class Product(
             "outgoing_qty	": {"group": ""},
             "incoming_qty": {"group": ""},
 
-            "website": {"type": const.__SPL_T_URL__, "itemtype": "metadata", "itemprop": "metatype"},
+            "website_url": {"type": const.__SPL_T_URL__, "itemtype": "http://schema.org/Product", "itemprop": "urlRewrite"},
             "activity_summary": {"write": False},
             "image": {"group": "", "notest": True},
+
+            "type": {"group": "", "required": False, "itemtype": "http://schema.org/Product", "itemprop": "type"},
 
             "create_date": {"group": "Meta", "itemtype": "http://schema.org/DataFeedItem", "itemprop": "dateCreated"},
             "write_date": {"group": "Meta", "itemtype": "http://schema.org/DataFeedItem", "itemprop": "dateModified"},
@@ -98,6 +100,10 @@ class Product(
         # ====================================================================#
         # Order Fields Inputs
         self.order_inputs()
+        # ====================================================================#
+        # Ensure default type
+        if "type" not in self._in:
+            self._in['type'] = 'product'
         # ====================================================================#
         # Init List of required Fields
         reqFields = self.collectRequiredCoreFields()
@@ -140,7 +146,7 @@ class Product(
             for template in model.product_tmpl_id:
                 self.template = template
                 break
-        except Exception as exception:
+        except Exception:
             from splashpy import Framework
             Framework.log().warn("Unable to Load Odoo Product " + str(object_id))
             return False

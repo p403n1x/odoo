@@ -14,6 +14,7 @@
 import json
 from odoo import http
 from splashpy import Framework
+from splashpy.helpers.objects import ObjectsHelper
 
 
 class M2MHelper:
@@ -212,6 +213,20 @@ class M2OHelper:
             return None
 
     @staticmethod
+    def get_object(inputs, field, object_type):
+        """
+        Get a Many 2 One Relation Splash Object Ids String
+        :param inputs: str
+        :param field: str
+        :param object_type: str
+        :return: str
+        """
+        object_id = M2OHelper.get_id()
+        if isinstance(object_id, int) and object_id > 0:
+            return ObjectsHelper.encode(object_type, object_id)
+        return None
+
+    @staticmethod
     def get_name_values(domain=None, filters=[]):
         """
         Get a Relation Possible Values Dict
@@ -276,6 +291,22 @@ class M2OHelper:
             M2OHelper.set_id(inputs, field, False)
 
     @staticmethod
+    def set_object(inputs, field, field_data, domain=None, filters=[]):
+        """
+        Set Many 2 One Relation Records from a Splash Object Id String
+        :param inputs: str      Object to Write
+        :param field: str       Field to Write
+        :param field_data:      None, str, int Data to Write
+        :param domain: str      Target Objects Domain
+        :param filters: list    Additionnal Search Filters
+        :return: void
+        """
+        object_id = ObjectsHelper.id(field_data)
+        if isinstance(object_id, int) and object_id > 0:
+            return M2OHelper.set_id(inputs, field, object_id, domain, filters)
+        return None
+
+    @staticmethod
     def verify_id(object_id, domain=None, filters=[]):
         """
         Validate Id
@@ -307,8 +338,17 @@ class M2OHelper:
         if not isinstance(object_name, str) or not isinstance(index, str) or not isinstance(domain, str):
             return None
         # Execute Domain Search with Filter
-        results = http.request.env[domain].search([(index, 'ilike', object_name)] + filters)
-        if len(results) == 1:
+        results = http.request.env[domain].search([(index, '=ilike', object_name)] + filters)
+
+        # Results Found => Ok
+        if len(results) > 0:
+            # More than One Result Found => Ok but Warning
+            if len(results) > 1:
+                war = "More than One result by name search: "
+                war += "'"+object_name+"' Name was found "+str(len(results))+" times"
+                war += " on table '"+domain+"'. First value was used."
+                Framework.log().warn(war)
+            # Return first result
             return results[0].id
         else:
             return None
