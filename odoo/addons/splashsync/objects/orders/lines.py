@@ -20,7 +20,7 @@ from splashpy.componants import FieldFactory
 from splashpy.helpers import ListHelper, PricesHelper, ObjectsHelper
 
 
-class Orderlines:
+class Orderline:
     """
     Access to Order line Fields
     """
@@ -32,22 +32,18 @@ class Orderlines:
         FieldFactory.create(ObjectsHelper.encode("Product", const.__SPL_T_ID__), "product_id", "Product ID")
         FieldFactory.inlist("Orderlines")
         FieldFactory.microData("http://schema.org/OrderItem", "orderedItem")
-        FieldFactory.isNotTested()
         # ==================================================================== #
         FieldFactory.create(ObjectsHelper.encode("Order", const.__SPL_T_ID__), "order_id", "Order ID")
         FieldFactory.inlist("Orderlines")
         FieldFactory.microData("http://schema.org/OrderItem", "orderID")
-        FieldFactory.isNotTested()
         # ==================================================================== #
         FieldFactory.create(const.__SPL_T_VARCHAR__, "state", "Line Status")
         FieldFactory.inlist("Orderlines")
         FieldFactory.microData("http://schema.org/OrderItem", "LineStatus")
-        FieldFactory.isNotTested()
         # ==================================================================== #
         FieldFactory.create(const.__SPL_T_VARCHAR__, "ref", "Product Ref.")
         FieldFactory.inlist("Orderlines")
         FieldFactory.microData("http://schema.org/Product", "ref")
-        FieldFactory.isNotTested()
         # ==================================================================== #
         FieldFactory.create(const.__SPL_T_VARCHAR__, "desc", "Product Desc.")
         FieldFactory.inlist("Orderlines")
@@ -62,12 +58,10 @@ class Orderlines:
         FieldFactory.create(const.__SPL_T_DOUBLE__, "delv_qty", "Delivered Qty")
         FieldFactory.inlist("Orderlines")
         FieldFactory.microData("http://schema.org/OrderItem", "orderDelivery")
-        FieldFactory.isNotTested()
         # ==================================================================== #
         FieldFactory.create(const.__SPL_T_DOUBLE__, "inv_qty", "Invoiced Qty")
         FieldFactory.inlist("Orderlines")
         FieldFactory.microData("http://schema.org/OrderItem", "orderQuantity")
-        FieldFactory.isNotTested()
         # ==================================================================== #
         FieldFactory.create(const.__SPL_T_PRICE__, "ut_price", "Unit Price")
         FieldFactory.inlist("Orderlines")
@@ -82,7 +76,6 @@ class Orderlines:
         FieldFactory.create(const.__SPL_T_VARCHAR__, "tax_name", "Taxes")
         FieldFactory.inlist("Orderlines")
         FieldFactory.microData("http://schema.org/Product", "priceTaxNames")
-        FieldFactory.isNotTested()
 
     def getLinesFields(self, index, field_id):
         """
@@ -168,41 +161,64 @@ class Orderlines:
         if field_id != "Orderlines":
             return
         # ==================================================================== #
-        # Init Lines List
-        new_orderline = []
-        # Framework.log().dump(field_data, "field_data")
-        # ==================================================================== #
         # Safety Check
         if not isinstance(field_data, dict):
             return
-        # ==================================================================== #
+        # # ==================================================================== #
         # Force Orderlines Ordering
-        field_data = OrderedDict(sorted(field_data.items()))
+        # field_data = OrderedDict(sorted(field_data.items()))
+        # ==================================================================== #
+        # Init List
+        new_orderlines = []
         # ==================================================================== #
         # Walk on Lines Field...
         for pos, line in field_data.items():
-            for key, value in line.items():
-                self._set_lines_values(key, value, pos)
+            for line_to_set in self.object.order_line.sorted(key=lambda r: r.sequence):
+                # for line_to_set in self.object.order_line.filtered(lambda r: r.sequence == ...):
+                Framework.log().dump(line.items(), "line.items(")
+                # if int(line_to_set.sequence) == ...):
+                self._set_lines_values(line, line_to_set)
+                # else:
+                #     new_orderlines.append(self._set_lines_values(line, line_to_set))
+                #     setattr(self.object, "order_line", new_orderlines)
         self._in.__delitem__(field_id)
 
-    def _set_lines_values(self, key, value, pos):
-        # check si je l'ai pas
-        # ...
-        if key == "product_id":
-            setattr(self.object.order_line[pos], "product_id", int(ObjectsHelper.id(value)))
-        if key == "ref":
-            setattr(self.object.order_line[pos], "product_id[0].default_code", value)
-        if key == "desc":
-            setattr(self.object.order_line[pos], "name", value)
-        if key == "ord_qty":
-            setattr(self.object.order_line[pos], "product_uom_qty", float(value))
-        if key == "delv_qty":
-            setattr(self.object.order_line[pos], "qty_delivered", float(value))
-        if key == "inv_qty":
-            setattr(self.object.order_line[pos], "qty_invoiced", float(value))
-        if key == "ut_price":
-            setattr(self.object.order_line[pos], "price_unit", PricesHelper.extract(value, "ht"))
-        if key == "tax_name" and value is not None:
-            setattr(self.object.order_line[pos], "tax_id", TaxHelper.find_by_rate(PricesHelper.extract(value, "vat"), 'sale'))
-        if key == "lead_time":
-            setattr(self.object.order_line[pos], "customer_lead", float(value))
+    def _set_lines_values(self, line, line_to_set):
+        for key, value in line.items():
+            if key == "product_id":
+                setattr(line_to_set, "product_id", int(ObjectsHelper.id(value)))
+            if key == "order_id":
+                setattr(line_to_set, "order_id", int(ObjectsHelper.id(value)))
+            if key == "ref":
+                setattr(line_to_set, "product_id[0].default_code", value)
+            if key == "desc":
+                setattr(line_to_set, "name", value)
+            if key == "state":
+                setattr(line_to_set, "state", value)
+            if key == "ord_qty":
+                setattr(line_to_set, "product_uom_qty", float(value))
+            if key == "delv_qty":
+                setattr(line_to_set, "qty_delivered", float(value))
+            if key == "inv_qty":
+                setattr(line_to_set, "qty_invoiced", float(value))
+            if key == "ut_price":
+                Framework.log().dump(PricesHelper.taxExcluded(value), "PricesHelper.taxExcluded(value)")
+                setattr(line_to_set, "price_unit", PricesHelper.taxExcluded(value))
+            if key == "tax_name" and value is not None:
+                # TODO: A revoir
+                setattr(line_to_set, "tax_id", TaxHelper.find_by_rate(PricesHelper.extract(value, "vat"), 'sale'))
+                # tax_rate = PricesHelper.taxPercent(field_data)
+                # if tax_rate is not None and tax_rate > 0:
+                #     tax = TaxHelper.find_by_rate(tax_rate, 'sale')
+                #     if tax is None:
+                #         return Framework.log().error("Unable to Identify Tax ID for Rate "+str(tax_rate))
+                #     else:
+                #         self.object.taxes_id = [(6, 0, [tax.id])]
+                # else:
+                #     self.object.taxes_id = [(6, 0, [])]
+            if key == "lead_time":
+                setattr(line_to_set, "customer_lead", float(value))
+
+    @staticmethod
+    def line_exist(field_data):
+        field_data.items()

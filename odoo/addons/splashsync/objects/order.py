@@ -11,13 +11,12 @@
 #  file that was distributed with this source code.
 #
 
-from splashpy import const, Framework
+from splashpy import Framework
 from . import OdooObject
-from .orders import Orderlines, OrderCore
+from .orders import Orderline, OrderCore
 
 
-# class Order(OdooObject, Orderlines, OrderCore):
-class Order(OdooObject, OrderCore):
+class Order(OdooObject, Orderline, OrderCore):
     # ====================================================================#
     # Splash Object Definition
     name = "Order"
