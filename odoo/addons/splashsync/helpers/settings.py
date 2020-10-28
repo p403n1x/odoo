@@ -24,11 +24,13 @@ class SettingsManager():
         'splash_ws_id': "",
         'splash_ws_key': "",
         'splash_ws_expert': False,
+        'splash_ws_no_commits': False,
         'splash_ws_host': "https://www.splashsync.com/ws/soap",
         'splash_ws_user': None,
         'splash_product_simplified_prices': False,
         'splash_product_advanced_variants': False,
         'splash_product_advanced_taxes': False,
+        'splash_sales_advanced_taxes': False,
     }
 
     @staticmethod
@@ -49,6 +51,10 @@ class SettingsManager():
         return bool(SettingsManager.get_configuration()["splash_ws_expert"])
 
     @staticmethod
+    def is_no_commits():
+        return bool(SettingsManager.get_configuration()["splash_ws_no_commits"])
+
+    @staticmethod
     def get_user():
         return SettingsManager.get_configuration()["splash_ws_user"]
 
@@ -65,13 +71,20 @@ class SettingsManager():
         return bool(SettingsManager.get_configuration()["splash_product_advanced_taxes"])
 
     @staticmethod
+    def is_sales_adv_taxes():
+        return bool(SettingsManager.get_configuration()["splash_sales_advanced_taxes"])
+
+    @staticmethod
     def get_company_id():
         """Get Requested Company Id"""
         # ====================================================================#
         # Detect Company Id
         company_id = 1
-        if "c" in request.params.keys():
-            company_id = int(request.params['c'])
+        try:
+            if "c" in request.params.keys():
+                company_id = int(request.params['c'])
+        except Exception as e:
+            return company_id
         return company_id
 
     @staticmethod
@@ -99,8 +112,12 @@ class SettingsManager():
     def ensure_company():
         """Ensure Current User Company Requested One"""
         expected_company_id = SettingsManager.get_company_id()
-        if request.env.user.company_id.id != expected_company_id:
-            request.env.user.company_id = expected_company_id
+        try:
+            if request.env.user.company_id.id != expected_company_id:
+                request.env.user.company_id = expected_company_id
+        except RuntimeError as e:
+            return
+
 
     @staticmethod
     def reset():
@@ -141,9 +158,11 @@ class SettingsManager():
             "splash_ws_id":       parameters.get_param('splash_ws_id', defaults['splash_ws_id']),
             "splash_ws_key":      parameters.get_param('splash_ws_key', defaults['splash_ws_key']),
             "splash_ws_expert":   bool(parameters.get_param('splash_ws_expert', defaults['splash_ws_expert'])),
+            "splash_ws_no_commits":   bool(parameters.get_param('splash_ws_no_commits', defaults['splash_ws_no_commits'])),
             "splash_ws_host":     parameters.get_param('splash_ws_host', defaults['splash_ws_host']),
             "splash_ws_user":     int(parameters.get_param('splash_ws_user', defaults['splash_ws_user'])),
             "splash_product_simplified_prices": bool(parameters.get_param('splash_product_simplified_prices', False)),
             "splash_product_advanced_taxes": bool(parameters.get_param('splash_product_advanced_taxes', False)),
             "splash_product_advanced_variants": bool(parameters.get_param('splash_product_advanced_variants', False)),
+            "splash_sales_advanced_taxes": bool(parameters.get_param('splash_sales_advanced_taxes', False)),
         }

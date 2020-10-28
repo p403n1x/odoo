@@ -19,6 +19,10 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
     _check_company_auto = True
 
+    # ====================================================================#
+    # CORE Settings
+    # ====================================================================#
+
     splash_ws_id = fields.Char(
         required=True,
         company_dependent=True,
@@ -37,6 +41,13 @@ class ResConfigSettings(models.TransientModel):
         string="Advanced Mode",
         help="Check this to Enable Advanced Configuration"
     )
+
+    splash_ws_no_commits = fields.Boolean(
+        company_dependent=True,
+        string="Disable Commits",
+        help="Check this to Disable Change Commits to Splash Server"
+    )
+
     splash_ws_host = fields.Char(
         company_dependent=True,
         string="Splash Server",
@@ -51,13 +62,16 @@ class ResConfigSettings(models.TransientModel):
         help="ID of Local User used by Splash"
     )
 
+    # ====================================================================#
+    # PRODUCTS Settings
+    # ====================================================================#
+
     splash_product_simplified_prices = fields.Boolean(
         company_dependent=True,
         string="Product Simplified Prices",
         default=False,
         help="Enable Simplified Mode to Store Product Extra Price at Product Level."
     )
-
     splash_product_advanced_taxes = fields.Boolean(
         company_dependent=True,
         string="Product Advanced Taxes",
@@ -71,6 +85,17 @@ class ResConfigSettings(models.TransientModel):
         help="Enable to store Products Features on features_value_ids instead of Template attribute_line_ids."
     )
 
+    # ====================================================================#
+    # SALES Settings
+    # ====================================================================#
+
+    splash_sales_advanced_taxes = fields.Boolean(
+        company_dependent=True,
+        string="Order & Invoices Advanced Taxes",
+        default=False,
+        help="Enable Advanced Taxes Mode."
+    )
+
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
         # Load Current Company Configuration
@@ -80,11 +105,13 @@ class ResConfigSettings(models.TransientModel):
             splash_ws_id=config.splash_ws_id,
             splash_ws_key=config.splash_ws_key,
             splash_ws_expert=bool(config.splash_ws_expert),
+            splash_ws_no_commits=bool(config.splash_ws_no_commits),
             splash_ws_host=config.splash_ws_host,
             splash_ws_user=config.splash_ws_user.id,
             splash_product_simplified_prices=bool(config.splash_product_simplified_prices),
             splash_product_advanced_taxes=bool(config.splash_product_advanced_taxes),
             splash_product_advanced_variants=bool(config.splash_product_advanced_variants),
+            splash_sales_advanced_taxes=bool(config.splash_sales_advanced_taxes),
         )
         return res
 
@@ -98,11 +125,13 @@ class ResConfigSettings(models.TransientModel):
             'splash_ws_id': self.splash_ws_id,
             'splash_ws_key': self.splash_ws_key,
             'splash_ws_expert': self.splash_ws_expert,
+            'splash_ws_no_commits': self.splash_ws_no_commits,
             'splash_ws_host': self.splash_ws_host,
             'splash_ws_user': self.splash_ws_user,
             'splash_product_simplified_prices': self.splash_product_simplified_prices,
             'splash_product_advanced_taxes': self.splash_product_advanced_taxes,
             'splash_product_advanced_variants': self.splash_product_advanced_variants,
+            'splash_sales_advanced_taxes': self.splash_sales_advanced_taxes,
         })
         # ====================================================================#
         # Default Company => Copy Configuration to Main Parameters
@@ -110,11 +139,13 @@ class ResConfigSettings(models.TransientModel):
             self.env['ir.config_parameter'].sudo().set_param('splash_ws_id', self.splash_ws_id)
             self.env['ir.config_parameter'].sudo().set_param('splash_ws_key', self.splash_ws_key)
             self.env['ir.config_parameter'].sudo().set_param('splash_ws_expert', self.splash_ws_expert)
+            self.env['ir.config_parameter'].sudo().set_param('splash_ws_no_commits', self.splash_ws_no_commits)
             self.env['ir.config_parameter'].sudo().set_param('splash_ws_host', self.splash_ws_host)
             self.env['ir.config_parameter'].sudo().set_param('splash_ws_user', self.splash_ws_user.id)
             self.env['ir.config_parameter'].sudo().set_param('splash_product_simplified_prices', self.splash_product_simplified_prices)
             self.env['ir.config_parameter'].sudo().set_param('splash_product_advanced_taxes', self.splash_product_advanced_taxes)
             self.env['ir.config_parameter'].sudo().set_param('splash_product_advanced_variants', self.splash_product_advanced_variants)
+            self.env['ir.config_parameter'].sudo().set_param('splash_sales_advanced_taxes', self.splash_sales_advanced_taxes)
 
     @staticmethod
     def get_base_url():

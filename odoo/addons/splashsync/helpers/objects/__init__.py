@@ -18,11 +18,11 @@ from .config import ObjectConfigurator
 from .currency import CurrencyHelper
 from .files import OddoFilesHelper
 from .lists import ListsHelper
-from .orders.customer import CustomerHelper
 from .partners.partners import PartnersHelper
 from .products.attributes import AttributesHelper, ValuesHelper, LinesHelper
 from .products.images import ProductImagesHelper
 from .products.suppliers import SupplierHelper
+from .orders.lines import OrderLinesHelper
 from .relations import M2MHelper, M2OHelper
 from .taxes import TaxHelper
 from .trans import TransHelper

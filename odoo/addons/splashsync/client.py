@@ -24,6 +24,9 @@ class OdooClient(ClientInfo):
     Define General Information about this Splash Client
     """
 
+    __splash_client = None
+    __splash_server = None
+
     def __init__(self):
         pass
 
@@ -34,11 +37,12 @@ class OdooClient(ClientInfo):
 
         :return: list
         """
-        from odoo.addons.splashsync.objects import ThirdParty, Address, Product
+        from odoo.addons.splashsync.objects import ThirdParty, Address, Product, Order
         return [
             Product(),
             ThirdParty(),
             Address(),
+            Order(),
         ]
 
     @staticmethod
@@ -90,12 +94,17 @@ class OdooClient(ClientInfo):
         :return SplashClient
         """
         from splashpy.client import SplashClient
+        if isinstance(OdooClient.__splash_client, SplashClient):
+            # ====================================================================#
+            # Ensure Framework is in Client Mode
+            Framework.setServerMode(False)
+            return OdooClient.__splash_client
         # ====================================================================#
         # Init Odoo User & Company
         SettingsManager.ensure_company()
         # ====================================================================#
         # Build Splash Client with Common Options
-        splash_client = SplashClient(
+        OdooClient.__splash_client = SplashClient(
             SettingsManager.get_id(),
             SettingsManager.get_key(),
             OdooClient.get_mapped_objects(),
@@ -103,11 +112,14 @@ class OdooClient(ClientInfo):
             OdooClient()
         )
         # ====================================================================#
+        # Ensure Framework is in Client Mode
+        Framework.setServerMode(False)
+        # ====================================================================#
         # Force Ws Host if Needed
         if SettingsManager.is_expert():
             Framework.config().force_host(SettingsManager.get_host())
 
-        return splash_client
+        return OdooClient.__splash_client
 
     # ====================================================================#
     # OBJECTS COMMITS
@@ -128,6 +140,12 @@ class OdooClient(ClientInfo):
             user_name = "Unknown User"
         # Send Commit Notification
         try:
+            # ====================================================================#
+            # Check if Commits Are Allowed
+            if SettingsManager.is_no_commits():
+                return True
+            # ====================================================================#
+            # Execute Commits with Client
             return OdooClient.get_client().commit(
                 str(splash_object.name),
                 object_ids,
@@ -136,9 +154,10 @@ class OdooClient(ClientInfo):
                 "[" + str(action).capitalize() + "]" + str(splash_object.desc) + " modified on Odoo"
             )
         except Exception as exception:
-            Framework.log().fromException(exception)
-            Framework.log().to_logging()
-            Framework.log().clear()
+            splashLogger = Framework.log()
+            if splashLogger:
+                Framework.log().fromException(exception, False)
+                Framework.log().to_logging().clear()
             return False
 
     def complete(self):

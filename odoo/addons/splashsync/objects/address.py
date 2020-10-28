@@ -23,7 +23,19 @@ class Address(OdooObject, PartnersCountry, AddresseName, PartnersParent, Address
     # Splash Object Definition
     name = "Address"
     desc = "Odoo Address"
-    icon = "fa fa-address-card-o"
+    icon = "fa fa-envelope-o"
+
+    # ====================================================================#
+    # Object Default Configuration
+    # ====================================================================#
+    # Imports
+    enable_pull_created = True
+    enable_pull_updated = True
+    enable_pull_deleted = True
+    # Exports
+    enable_push_created = True
+    enable_push_updated = True
+    enable_push_deleted = False
 
     @staticmethod
     def getDomain():
@@ -60,7 +72,7 @@ class Address(OdooObject, PartnersCountry, AddresseName, PartnersParent, Address
 
             "email": {"type": const.__SPL_T_EMAIL__, "group": "", "itemtype": "http://schema.org/ContactPoint", "itemprop": "email"},
             "mobile": {"type": const.__SPL_T_PHONE__, "group": "", "itemtype": "http://schema.org/Person", "itemprop": "telephone"},
-            "phone": {"type": const.__SPL_T_PHONE__, "group": "", "itemtype": "http://schema.org/Organization", "itemprop": "telephone"},
+            "phone": {"type": const.__SPL_T_PHONE__, "group": "", "itemtype": "http://schema.org/PostalAddress", "itemprop": "telephone"},
 
             "name": {"required": False, "write": False},
             "type": {"required": False},
